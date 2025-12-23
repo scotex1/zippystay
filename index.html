@@ -31,13 +31,72 @@
   <!-- NAV -->
   <nav class="bg-white shadow p-3 sticky top-0 z-40">
     <div class="container mx-auto flex gap-3 items-center">
-      <a href="#" id="nav-main" class="px-3 py-1 rounded hover:bg-gray-100">🏠 Main</a>
-      <a href="#" id="nav-admin-login" class="px-3 py-1 rounded hover:bg-gray-100">🔐 Admin Login</a>
+      <a href="#" id="nav-main" class="px-3 py-1 rounded hover:bg-gray-100">🏠 Main</a> 
+      <a href="#" id="nav-home" class="px-3 py-1 rounded hover:bg-gray-100">🏡 Home</a>
+      <a href="#" id="nav-about" class="px-3 py-1 rounded hover:bg-gray-100">ℹ️ About</a>
+      <a href="#" id="nav-terms" class="px-3 py-1 rounded hover:bg-gray-100">📜 Commission</a>
+      <a href="#" id="nav-contact" class="px-3 py-1 rounded hover:bg-gray-100">📞 Contact</a>
+       <a href="#" id="nav-admin-login" class="px-3 py-1 rounded hover:bg-gray-100">🔐 Admin Login</a>
       <a href="#" id="nav-admin-dashboard" class="px-3 py-1 rounded hover:bg-gray-100">📊 Admin Dashboard</a>
       <div class="ml-auto text-sm text-gray-600">UP Room Finder</div>
     </div>
   </nav>
+ <!-- ================= HOME HERO SECTION ================= -->
+<section id="section-home" class="mb-12">
+  <main class="w-full overflow-hidden rounded-3xl"
+    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
 
+    <div class="min-h-[80vh] flex items-center justify-center p-6">
+      <div class="w-full max-w-6xl text-white rounded-2xl p-10 shadow-xl">
+
+        <!-- LOGO -->
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-12 h-12 rounded-full bg-white p-1 flex items-center justify-center">
+            <svg width="40" height="40" viewBox="0 0 40 40">
+              <path d="M22 8L16 20H20L18 32L26 18H22Z" fill="#667eea"/>
+              <path d="M12 22L20 16L28 22" stroke="#667eea" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+          <span class="text-2xl font-bold tracking-wide">ZippyStay</span>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+          <div>
+            <h1 class="text-5xl font-extrabold mb-4 leading-tight">
+              Welcome to <br>
+              <span class="text-yellow-300">ZippyStay</span>
+            </h1>
+
+            <p class="text-xl opacity-90 mb-6">
+              A smart & trusted platform for students, job seekers,
+              and families to discover safe and affordable stays
+              across Uttar Pradesh.
+            </p>
+
+            <p class="text-lg opacity-80 mb-6">
+              Fast • Secure • Verified • Student-Friendly
+            </p>
+
+            <button onclick="showSection('section-main'); activateRenterTab();"
+              class="bg-white text-indigo-700 font-bold px-8 py-3 rounded-full shadow hover:scale-105 transition">
+              🔍 Find Rooms Now
+            </button>
+          </div>
+
+          <!-- ILLUSTRATION -->
+          <div class="flex justify-center">
+            <img
+              src="https://res.cloudinary.com/demo/image/upload/v169/student-illustration.png"
+              alt="Student Illustration"
+              class="max-w-sm w-full drop-shadow-lg">
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</section>
   <main class="container mx-auto px-4 py-6">
 
     <!-- FIREBASE STATUS -->
@@ -1179,3 +1238,4 @@
 
 </body>
 </html>
+
