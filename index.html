@@ -1,0 +1,1181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UP Room Finder — Final (Single File)</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase (compat SDKs) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+  <!-- Razorpay -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <style>
+    body { box-sizing: border-box; }
+    .custom-font { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .photo-preview { width:100px; height:100px; object-fit:cover; border-radius:8px; }
+    .upload-area { border:2px dashed #cbd5e1; border-radius:8px; padding:20px; text-align:center; cursor:pointer; transition:all .3s; }
+    .upload-area.dragover { border-color:#3b82f6; background:#eff6ff; }
+    .hidden-section { display:none; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 custom-font">
+  <!-- NAV -->
+  <nav class="bg-white shadow p-3 sticky top-0 z-40">
+    <div class="container mx-auto flex gap-3 items-center">
+      <a href="#" id="nav-main" class="px-3 py-1 rounded hover:bg-gray-100">🏠 Main</a>
+      <a href="#" id="nav-admin-login" class="px-3 py-1 rounded hover:bg-gray-100">🔐 Admin Login</a>
+      <a href="#" id="nav-admin-dashboard" class="px-3 py-1 rounded hover:bg-gray-100">📊 Admin Dashboard</a>
+      <div class="ml-auto text-sm text-gray-600">UP Room Finder</div>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-4 py-6">
+
+    <!-- FIREBASE STATUS -->
+    <div id="firebase-status" class="text-center text-sm my-3"></div>
+
+    <!-- MAIN SECTION -->
+    <section id="section-main">
+      <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white text-center py-3 rounded-lg mb-4 shadow-lg">
+        <strong>🔥 Uttar Pradesh Room Finder</strong> — Firebase + Razorpay + Admin
+      </div>
+
+      <header class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">Room Finder (Uttar Pradesh)</h1>
+        <p class="text-gray-600">🏠 Find Rooms & Flats Across All Districts</p>
+      </header>
+
+      <!-- TABS: Owner / Find Room / Student Rooms -->
+      <div class="flex justify-center mb-6">
+        <div class="bg-white rounded-lg p-1 shadow-sm flex gap-1">
+          <button id="owner-tab" class="px-6 py-2 rounded-md bg-blue-600 text-white font-medium">Property Owner</button>
+          <button id="renter-tab" class="px-6 py-2 rounded-md text-gray-600 hover:text-blue-600">Find Room</button>
+          <button id="student-tab" class="px-6 py-2 rounded-md text-gray-600 hover:text-blue-600">Student Rooms</button>
+        </div>
+      </div>
+
+      <!-- OWNER SECTION -->
+      <div id="owner-section" class="space-y-6">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <h2 class="text-2xl font-bold mb-4">List Your Property</h2>
+
+          <form id="room-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <!-- District -->
+            <div>
+              <label class="block text-sm font-medium mb-1">District</label>
+              <select id="district-select" required class="w-full px-3 py-2 border rounded">
+                <option value="">Select District</option>
+                <option value="Agra">Agra</option>
+                <option value="Aligarh">Aligarh</option>
+                <option value="Ambedkar Nagar">Ambedkar Nagar</option>
+                <option value="Amethi">Amethi</option>
+                <option value="Amroha">Amroha</option>
+                <option value="Auraiya">Auraiya</option>
+                <option value="Ayodhya">Ayodhya</option>
+                <option value="Azamgarh">Azamgarh</option>
+                <option value="Baghpat">Baghpat</option>
+                <option value="Bahraich">Bahraich</option>
+                <option value="Ballia">Ballia</option>
+                <option value="Balrampur">Balrampur</option>
+                <option value="Banda">Banda</option>
+                <option value="Barabanki">Barabanki</option>
+                <option value="Bareilly">Bareilly</option>
+                <option value="Basti">Basti</option>
+                <option value="Bhadohi">Bhadohi</option>
+                <option value="Bijnor">Bijnor</option>
+                <option value="Budaun">Budaun</option>
+                <option value="Bulandshahr">Bulandshahr</option>
+                <option value="Chandauli">Chandauli</option>
+                <option value="Chitrakoot">Chitrakoot</option>
+                <option value="Deoria">Deoria</option>
+                <option value="Etah">Etah</option>
+                <option value="Etawah">Etawah</option>
+                <option value="Farrukhabad">Farrukhabad</option>
+                <option value="Fatehpur">Fatehpur</option>
+                <option value="Firozabad">Firozabad</option>
+                <option value="Gautam Buddh Nagar">Gautam Buddh Nagar</option>
+                <option value="Ghaziabad">Ghaziabad</option>
+                <option value="Ghazipur">Ghazipur</option>
+                <option value="Gonda">Gonda</option>
+                <option value="Gorakhpur">Gorakhpur</option>
+                <option value="Hamirpur">Hamirpur</option>
+                <option value="Hapur">Hapur</option>
+                <option value="Hardoi">Hardoi</option>
+                <option value="Hathras">Hathras</option>
+                <option value="Jalaun">Jalaun</option>
+                <option value="Jaunpur">Jaunpur</option>
+                <option value="Jhansi">Jhansi</option>
+                <option value="Kannauj">Kannauj</option>
+                <option value="Kanpur Dehat">Kanpur Dehat</option>
+                <option value="Kanpur Nagar">Kanpur Nagar</option>
+                <option value="Kasganj">Kasganj</option>
+                <option value="Kaushambi">Kaushambi</option>
+                <option value="Kheri">Kheri</option>
+                <option value="Kushinagar">Kushinagar</option>
+                <option value="Lalitpur">Lalitpur</option>
+                <option value="Lucknow">Lucknow</option>
+                <option value="Maharajganj">Maharajganj</option>
+                <option value="Mahoba">Mahoba</option>
+                <option value="Mainpuri">Mainpuri</option>
+                <option value="Mathura">Mathura</option>
+                <option value="Mau">Mau</option>
+                <option value="Meerut">Meerut</option>
+                <option value="Mirzapur">Mirzapur</option>
+                <option value="Moradabad">Moradabad</option>
+                <option value="Muzaffarnagar">Muzaffarnagar</option>
+                <option value="Pilibhit">Pilibhit</option>
+                <option value="Pratapgarh">Pratapgarh</option>
+                <option value="Prayagraj">Prayagraj</option>
+                <option value="Rae Bareli">Rae Bareli</option>
+                <option value="Rampur">Rampur</option>
+                <option value="Saharanpur">Saharanpur</option>
+                <option value="Sambhal">Sambhal</option>
+                <option value="Sant Kabir Nagar">Sant Kabir Nagar</option>
+                <option value="Shahjahanpur">Shahjahanpur</option>
+                <option value="Shamli">Shamli</option>
+                <option value="Shravasti">Shravasti</option>
+                <option value="Siddharthnagar">Siddharthnagar</option>
+                <option value="Sitapur">Sitapur</option>
+                <option value="Sonbhadra">Sonbhadra</option>
+                <option value="Sultanpur">Sultanpur</option>
+                <option value="Unnao">Unnao</option>
+                <option value="Varanasi">Varanasi</option>
+              </select>
+            </div>
+
+            <!-- AREA -->
+            <div>
+              <label class="block text-sm font-medium mb-1">Area</label>
+              <select id="area-select" required class="w-full px-3 py-2 border rounded">
+                <option value="">Select Area</option>
+              </select>
+            </div>
+
+            <!-- PROPERTY TITLE -->
+            <div>
+              <label class="block text-sm font-medium mb-1">Property Title</label>
+              <input id="room-title" required class="w-full px-3 py-2 border rounded" placeholder="e.g., Spacious Room Near Civil Lines" />
+            </div>
+
+            <!-- PRICE -->
+            <div>
+              <label class="block text-sm font-medium mb-1">Monthly Rent (₹)</label>
+              <input id="room-price" type="number" required class="w-full px-3 py-2 border rounded" />
+            </div>
+
+            <!-- LOCATION -->
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium mb-1">Detailed Address</label>
+              <input id="room-location" required class="w-full px-3 py-2 border rounded" placeholder="e.g., Near MNNIT, Teliarganj" />
+            </div>
+
+            <!-- PROPERTY TYPE -->
+            <div>
+              <label class="block text-sm font-medium mb-1">Property Type</label>
+              <select id="room-type" required class="w-full px-3 py-2 border rounded">
+                <option value="">Select Type</option>
+                <option value="single">Single Room</option>
+                <option value="shared">Shared Room</option>
+                <option value="pg">PG / Hostel</option>
+                <option value="flat">1BHK / 2BHK Flat</option>
+                <option value="bachelor">Bachelor Room</option>
+              </select>
+            </div>
+
+            <!-- LISTING PACKAGE -->
+            <div>
+              <label class="block text-sm font-medium mb-1">Listing Package</label>
+              <select id="listing-package" required class="w-full px-3 py-2 border rounded">
+                <option value="">Select Package</option>
+                <option value="199">Basic – ₹199 (30 days)</option>
+                <option value="299">Standard – ₹299 (60 days)</option>
+                <option value="499">Premium – ₹499 (90 days)</option>
+                <option value="999">Featured – ₹999 (Homepage Boost)</option>
+              </select>
+            </div>
+
+            <!-- PHOTO UPLOAD -->
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium mb-1">Upload Property Photos</label>
+              <div id="upload-area" class="upload-area">
+                Click or Drag Photos Here
+                <input type="file" id="photo-input" accept="image/*" multiple class="hidden">
+              </div>
+              <div id="photo-preview" class="flex gap-3 mt-3 flex-wrap"></div>
+            </div>
+
+            <!-- DESCRIPTION -->
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium mb-1">Description</label>
+              <textarea id="room-description" rows="3" class="w-full px-3 py-2 border rounded" placeholder="Describe room, facilities, nearby areas..."></textarea>
+            </div>
+
+            <!-- OWNER DETAILS -->
+            <div>
+              <label class="block text-sm font-medium mb-1">Owner Name</label>
+              <input id="owner-name" required class="w-full px-3 py-2 border rounded" placeholder="Your name" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Contact</label>
+              <input id="owner-contact" required class="w-full px-3 py-2 border rounded" placeholder="Phone / Email" />
+            </div>
+
+            <!-- SUBMIT -->
+            <div class="md:col-span-2 text-center">
+              <button id="submit-room" class="bg-green-600 text-white px-6 py-3 rounded shadow hover:bg-green-700">Upload & Pay</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Owner's current listings -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <h3 class="text-xl font-bold mb-4">Your Listed Properties</h3>
+          <div id="owner-rooms" class="space-y-4">
+            <p class="text-gray-500 text-center py-8">Loading properties...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RENTER SECTION -->
+      <div id="renter-section" class="hidden space-y-6">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <h2 class="text-2xl font-bold mb-4">Search Properties</h2>
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">District</label>
+              <select id="search-district" class="w-full px-3 py-2 border rounded">
+                <option value="">All Districts</option>
+                <!-- repeated district list for search -->
+                <option value="Agra">Agra</option>
+                <option value="Aligarh">Aligarh</option>
+                <option value="Ambedkar Nagar">Ambedkar Nagar</option>
+                <option value="Amethi">Amethi</option>
+                <option value="Amroha">Amroha</option>
+                <option value="Auraiya">Auraiya</option>
+                <option value="Ayodhya">Ayodhya</option>
+                <option value="Azamgarh">Azamgarh</option>
+                <option value="Baghpat">Baghpat</option>
+                <option value="Bahraich">Bahraich</option>
+                <option value="Ballia">Ballia</option>
+                <option value="Balrampur">Balrampur</option>
+                <option value="Banda">Banda</option>
+                <option value="Barabanki">Barabanki</option>
+                <option value="Bareilly">Bareilly</option>
+                <option value="Basti">Basti</option>
+                <option value="Bhadohi">Bhadohi</option>
+                <option value="Bijnor">Bijnor</option>
+                <option value="Budaun">Budaun</option>
+                <option value="Bulandshahr">Bulandshahr</option>
+                <option value="Chandauli">Chandauli</option>
+                <option value="Chitrakoot">Chitrakoot</option>
+                <option value="Deoria">Deoria</option>
+                <option value="Etah">Etah</option>
+                <option value="Etawah">Etawah</option>
+                <option value="Farrukhabad">Farrukhabad</option>
+                <option value="Fatehpur">Fatehpur</option>
+                <option value="Firozabad">Firozabad</option>
+                <option value="Gautam Buddh Nagar">Gautam Buddh Nagar</option>
+                <option value="Ghaziabad">Ghaziabad</option>
+                <option value="Ghazipur">Ghazipur</option>
+                <option value="Gonda">Gonda</option>
+                <option value="Gorakhpur">Gorakhpur</option>
+                <option value="Hamirpur">Hamirpur</option>
+                <option value="Hapur">Hapur</option>
+                <option value="Hardoi">Hardoi</option>
+                <option value="Hathras">Hathras</option>
+                <option value="Jalaun">Jalaun</option>
+                <option value="Jaunpur">Jaunpur</option>
+                <option value="Jhansi">Jhansi</option>
+                <option value="Kannauj">Kannauj</option>
+                <option value="Kanpur Dehat">Kanpur Dehat</option>
+                <option value="Kanpur Nagar">Kanpur Nagar</option>
+                <option value="Kasganj">Kasganj</option>
+                <option value="Kaushambi">Kaushambi</option>
+                <option value="Kheri">Kheri</option>
+                <option value="Kushinagar">Kushinagar</option>
+                <option value="Lalitpur">Lalitpur</option>
+                <option value="Lucknow">Lucknow</option>
+                <option value="Maharajganj">Maharajganj</option>
+                <option value="Mahoba">Mahoba</option>
+                <option value="Mainpuri">Mainpuri</option>
+                <option value="Mathura">Mathura</option>
+                <option value="Mau">Mau</option>
+                <option value="Meerut">Meerut</option>
+                <option value="Mirzapur">Mirzapur</option>
+                <option value="Moradabad">Moradabad</option>
+                <option value="Muzaffarnagar">Muzaffarnagar</option>
+                <option value="Pilibhit">Pilibhit</option>
+                <option value="Pratapgarh">Pratapgarh</option>
+                <option value="Prayagraj">Prayagraj</option>
+                <option value="Rae Bareli">Rae Bareli</option>
+                <option value="Rampur">Rampur</option>
+                <option value="Saharanpur">Saharanpur</option>
+                <option value="Sambhal">Sambhal</option>
+                <option value="Sant Kabir Nagar">Sant Kabir Nagar</option>
+                <option value="Shahjahanpur">Shahjahanpur</option>
+                <option value="Shamli">Shamli</option>
+                <option value="Shravasti">Shravasti</option>
+                <option value="Siddharthnagar">Siddharthnagar</option>
+                <option value="Sitapur">Sitapur</option>
+                <option value="Sonbhadra">Sonbhadra</option>
+                <option value="Sultanpur">Sultanpur</option>
+                <option value="Unnao">Unnao</option>
+                <option value="Varanasi">Varanasi</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">Area</label>
+              <select id="search-area" class="w-full px-3 py-2 border rounded">
+                <option value="">All Areas</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">Type</label>
+              <select id="search-type" class="w-full px-3 py-2 border rounded">
+                <option value="">All Types</option>
+                <option value="single">Single Room</option>
+                <option value="shared">Shared</option>
+                <option value="pg">PG/Hostel</option>
+                <option value="flat">Flat</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">Max Price (₹)</label>
+              <input id="search-max-price" type="number" class="w-full px-3 py-2 border rounded" placeholder="e.g., 5000" />
+            </div>
+
+            <div class="md:col-span-2 flex items-end">
+              <button id="search-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">🔍 Search</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <h3 class="text-xl font-bold mb-4">Available Properties</h3>
+          <div id="available-rooms" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p class="text-gray-500 text-center py-8 col-span-full">Loading properties...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- STUDENT SECTION -->
+      <div id="student-section" class="hidden space-y-6">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <h2 class="text-2xl font-bold mb-4">Student Room / PG Search</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Your Name</label>
+              <input id="student-name" class="w-full px-3 py-2 border rounded" placeholder="Enter your name">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Email</label>
+              <input id="student-email" class="w-full px-3 py-2 border rounded" placeholder="Enter email">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Phone</label>
+              <input id="student-phone" class="w-full px-3 py-2 border rounded" placeholder="Enter phone no.">
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">City / District</label>
+              <select id="student-city" class="w-full px-3 py-2 border rounded">
+                <option value="">Select City</option>
+                <option value="Prayagraj">Prayagraj</option>
+                <option value="Lucknow">Lucknow</option>
+                <option value="Varanasi">Varanasi</option>
+                <option value="Kanpur Nagar">Kanpur Nagar</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">Area</label>
+              <select id="student-area" class="w-full px-3 py-2 border rounded">
+                <option value="">Select Area</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">Max Price (₹)</label>
+              <input id="student-price" type="number" class="w-full px-3 py-2 border rounded" placeholder="Max Budget e.g., 5000">
+            </div>
+          </div>
+
+          <div class="text-center mt-4">
+            <button id="student-search-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-full hover:bg-indigo-700">
+              Search Student Rooms
+            </button>
+          </div>
+        </div>
+
+        <div id="student-results" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </div>
+
+      <!-- Booking modal (simple) -->
+      <div id="booking-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4 max-h-[90%] overflow-y-auto">
+          <h3 class="text-xl font-bold mb-4">Book Property</h3>
+          <div id="booking-details" class="mb-4"></div>
+          <form id="booking-form">
+            <div class="space-y-4">
+              <div><label class="block text-sm mb-1">Your Name</label><input id="renter-name" required class="w-full px-3 py-2 border rounded" /></div>
+              <div><label class="block text-sm mb-1">Contact</label><input id="renter-contact" required class="w-full px-3 py-2 border rounded" /></div>
+              <div><label class="block text-sm mb-1">Move-in Date</label><input id="move-in-date" type="date" required class="w-full px-3 py-2 border rounded" /></div>
+            </div>
+            <div class="flex gap-3 mt-6">
+              <button type="button" id="cancel-booking" class="flex-1 bg-gray-300 py-2 rounded">Cancel</button>
+              <button type="submit" class="flex-1 bg-green-600 text-white py-2 rounded">💳 Pay with Razorpay</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ADMIN LOGIN -->
+    <section id="section-admin-login" class="hidden-section mt-6">
+      <div class="max-w-md mx-auto">
+        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl shadow-lg p-6 mb-6">
+          <h2 class="text-2xl font-bold mb-4">🔐 Admin Panel - Login</h2>
+          <p class="text-sm">Use your admin credentials to sign in.</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8">
+          <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Admin Login</h1>
+          </div>
+
+          <form id="admin-login-form" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Admin Email</label>
+              <input type="email" id="admin-email-input" required class="w-full px-4 py-3 border rounded" value="admin@prayagrajrooms.com" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <input type="password" id="admin-password-input" required class="w-full px-4 py-3 border rounded" placeholder="Enter your password" />
+            </div>
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded">🔓 Login as Admin</button>
+          </form>
+
+          <div id="admin-firebase-status" class="mt-6 text-center text-sm"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADMIN DASHBOARD -->
+    <section id="section-admin-dashboard" class="hidden-section mt-6">
+      <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl shadow-lg p-6 mb-6">
+        <div class="flex justify-between items-center gap-4">
+          <div>
+            <h1 class="text-3xl font-bold">🔐 Admin Dashboard</h1>
+            <p class="mt-2">UP Room Finder - Admin Control Panel</p>
+          </div>
+          <div class="flex gap-3">
+            <a href="#" id="admin-main-link" class="bg-white bg-opacity-20 px-4 py-2 rounded-lg">🏠 Main Site</a>
+            <button id="admin-logout" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg">🚪 Logout</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-gray-500 text-sm font-medium mb-1">Total Properties</h3>
+          <p id="stat-total" class="text-3xl font-bold text-blue-600">0</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-gray-500 text-sm font-medium mb-1">Pending Approval</h3>
+          <p id="stat-pending" class="text-3xl font-bold text-yellow-600">0</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-gray-500 text-sm font-medium mb-1">Approved</h3>
+          <p id="stat-approved" class="text-3xl font-bold text-green-600">0</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-gray-500 text-sm font-medium mb-1">Total Revenue</h3>
+          <p id="stat-revenue" class="text-3xl font-bold text-purple-600">₹0</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <h3 class="text-xl font-bold mb-4">⏳ Pending Approvals</h3>
+        <div id="pending-approvals" class="space-y-4"><p class="text-gray-500 text-center py-8">Loading...</p></div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <h3 class="text-xl font-bold mb-4">📋 All Properties</h3>
+        <div id="all-properties" class="space-y-4"><p class="text-gray-500 text-center py-8">Loading...</p></div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <h3 class="text-xl font-bold mb-4">🎓 Student Booking Requests</h3>
+        <div id="student-bookings" class="space-y-4"><p class="text-gray-500 text-center py-8">Loading...</p></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- SCRIPTS -->
+  <script>
+    /***** CONFIG *****/
+    const firebaseConfig = {
+      apiKey: "AIzaSyAoPCQNk0YWg9YAdflZpVItLYg_7VwoQAw",
+      authDomain: "roomstore-51114.firebaseapp.com",
+      projectId: "roomstore-51114",
+      storageBucket: "roomstore-51114.firebasestorage.app",
+      messagingSenderId: "112181513858",
+      appId: "1:112181513858:web:e702d73c606a6e41e1ae9b",
+      measurementId: "G-S4WLNW0Q2W"
+    };
+    const RAZORPAY_KEY = "rzp_live_YOUR_REAL_KEY_HERE";
+
+    /***** INIT FIREBASE *****/
+    let db = null, storage = null, auth = null;
+    try {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      storage = firebase.storage();
+      auth = firebase.auth();
+      const fbEl = document.getElementById('firebase-status');
+      if (fbEl) fbEl.innerHTML = '<p class="font-bold text-green-700">✅ Firebase Connected!</p>';
+      document.getElementById('admin-firebase-status').innerHTML = '<span class="text-green-600">✅ Firebase Ready</span>';
+    } catch (err) {
+      console.error('Firebase init error', err);
+      const fbEl = document.getElementById('firebase-status');
+      if (fbEl) fbEl.innerHTML = '<p class="font-bold text-red-700">❌ Firebase Failed</p>';
+      document.getElementById('admin-firebase-status').innerHTML = '<span class="text-red-600">❌ Firebase not initialized</span>';
+    }
+
+    /***** GLOBAL STATE *****/
+    let uploadedFiles = [];
+    let uploadedDataURLs = [];
+    let currentRooms = [];
+    let selectedRoomForBooking = null;
+
+    /***** AREA DATA *****/
+    const prayagrajAreas = ["Civil Lines","Katra","Naini","Allahpur","Georgetown","Kareli","Mutthiganj","Chowk","Daraganj","Jhunsi","Teliarganj","Rajrooppur","Kydganj","Colonelganj"];
+    const defaultAreas = ["Main City","City Center","Bus Stand Area","Nearby Locality"];
+
+    function populateAreaSelectFor(district, selectEl) {
+      if (!selectEl) return;
+      let areas = [];
+      if (!district) areas = [];
+      else if (district === "Prayagraj") areas = prayagrajAreas;
+      else areas = defaultAreas;
+      selectEl.innerHTML = '<option value="">Select Area</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+    }
+
+    // wire owner district->area
+    const districtSelect = document.getElementById('district-select');
+    const areaSelect = document.getElementById('area-select');
+    if (districtSelect && areaSelect) {
+      districtSelect.addEventListener('change', () => populateAreaSelectFor(districtSelect.value, areaSelect));
+    }
+
+    // wire search district->area
+    const searchDistrict = document.getElementById('search-district');
+    const searchArea = document.getElementById('search-area');
+    if (searchDistrict && searchArea) {
+      searchDistrict.addEventListener('change', () => populateAreaSelectFor(searchDistrict.value, searchArea));
+    }
+
+    // wire student city->area
+    const studentCity = document.getElementById('student-city');
+    const studentArea = document.getElementById('student-area');
+    if (studentCity && studentArea) {
+      studentCity.addEventListener('change', () => populateAreaSelectFor(studentCity.value, studentArea));
+    }
+
+    /***** TAB SWITCHING *****/
+    const ownerTab = document.getElementById("owner-tab");
+    const renterTab = document.getElementById("renter-tab");
+    const studentTab = document.getElementById("student-tab");
+    const ownerSection = document.getElementById("owner-section");
+    const renterSection = document.getElementById("renter-section");
+    const studentSection = document.getElementById("student-section");
+
+    function activateOwnerTab() {
+      ownerTab.classList.add("bg-blue-600","text-white");
+      renterTab.classList.remove("bg-blue-600","text-white");
+      studentTab.classList.remove("bg-blue-600","text-white");
+      ownerSection.classList.remove("hidden");
+      renterSection.classList.add("hidden");
+      studentSection.classList.add("hidden");
+    }
+    function activateRenterTab() {
+      renterTab.classList.add("bg-blue-600","text-white");
+      ownerTab.classList.remove("bg-blue-600","text-white");
+      studentTab.classList.remove("bg-blue-600","text-white");
+      renterSection.classList.remove("hidden");
+      ownerSection.classList.add("hidden");
+      studentSection.classList.add("hidden");
+    }
+    function activateStudentTab() {
+      studentTab.classList.add("bg-blue-600","text-white");
+      ownerTab.classList.remove("bg-blue-600","text-white");
+      renterTab.classList.remove("bg-blue-600","text-white");
+      studentSection.classList.remove("hidden");
+      ownerSection.classList.add("hidden");
+      renterSection.classList.add("hidden");
+    }
+
+    ownerTab.addEventListener('click', (e) => { e.preventDefault(); activateOwnerTab(); });
+    renterTab.addEventListener('click', (e) => { e.preventDefault(); activateRenterTab(); });
+    studentTab.addEventListener('click', (e) => { e.preventDefault(); activateStudentTab(); });
+
+    // default
+    activateOwnerTab();
+
+    /***** UPLOAD UI *****/
+    const uploadArea = document.getElementById('upload-area');
+    const photoInput = document.getElementById('photo-input');
+    const photoPreview = document.getElementById('photo-preview');
+
+    function updatePhotoPreviewUI() {
+      if (!photoPreview) return;
+      photoPreview.innerHTML = uploadedDataURLs.map((d, i) => `
+        <div class="relative">
+          <img src="${d}" class="photo-preview cursor-pointer" onclick="window.open('${d}','_blank')">
+          <button class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs" onclick="removeLocalPhoto(${i})">×</button>
+        </div>`).join('');
+    }
+
+    window.removeLocalPhoto = (index) => {
+      uploadedDataURLs.splice(index,1);
+      uploadedFiles.splice(index,1);
+      updatePhotoPreviewUI();
+    };
+
+    if (uploadArea && photoInput) {
+      uploadArea.addEventListener('click', () => photoInput.click());
+      uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+      uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault(); uploadArea.classList.remove('dragover');
+        const files = Array.from(e.dataTransfer.files || []);
+        handleSelectedFiles(files);
+      });
+
+      photoInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files || []);
+        handleSelectedFiles(files);
+        photoInput.value = '';
+      });
+    }
+
+    function handleSelectedFiles(files) {
+      files.forEach(file => {
+        if (!file.type.startsWith('image/')) return showToast('Only images allowed', 'error');
+        if (file.size > 5 * 1024 * 1024) return showToast('Each image must be <= 5MB', 'error');
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          uploadedDataURLs.push(ev.target.result);
+          uploadedFiles.push(file);
+          updatePhotoPreviewUI();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    /***** RAZORPAY WRAPPER *****/
+    function initiateRazorpay(amountINR, meta, cb) {
+      if (!amountINR || amountINR <= 0) {
+        return cb(true, { payment_id: 'free_' + Date.now() });
+      }
+      if (!RAZORPAY_KEY || RAZORPAY_KEY.includes('YOUR_')) {
+        showToast('Razorpay key missing — running demo flow', 'warning');
+        setTimeout(() => cb(true, { payment_id: 'demo_' + Date.now() }), 700);
+        return;
+      }
+      const options = {
+        key: RAZORPAY_KEY,
+        amount: Math.round(amountINR * 100),
+        currency: 'INR',
+        name: 'UP Room Finder',
+        description: meta?.description || 'Listing Payment',
+        handler: function (res) { cb(true, res); },
+        modal: { ondismiss: function() { cb(false); } }
+      };
+      const rzp = new Razorpay(options);
+      rzp.open();
+    }
+
+    /***** FIREBASE HELPERS *****/
+   async function uploadImagesToCloudinary(files) {
+  const CLOUD_NAME = "dc9i9ofw4";        // ✅ आपका Cloudinary cloud name
+  const UPLOAD_PRESET = "ml_default";   // ✅ unsigned preset
+
+  const uploadedURLs = [];
+
+  for (let file of files) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", UPLOAD_PRESET);
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.secure_url) {
+      uploadedURLs.push(data.secure_url);
+    } else {
+      throw new Error("Cloudinary upload failed");
+    }
+  }
+
+  return uploadedURLs;
+}
+
+
+    async function addListingToFirestore(listing) {
+      if (!db) throw new Error('DB not initialized');
+      const docRef = await db.collection('rooms').add(listing);
+      return docRef.id;
+    }
+
+    /***** SUBMIT LISTING (OWNER) *****/
+    const submitRoomBtn = document.getElementById('submit-room');
+    if (submitRoomBtn) {
+      submitRoomBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+          const title = document.getElementById('room-title')?.value?.trim();
+          const district = districtSelect?.value;
+          const area = areaSelect?.value;
+          const price = parseInt(document.getElementById('room-price')?.value || 0);
+          const location = document.getElementById('room-location')?.value?.trim();
+          const roomType = document.getElementById('room-type')?.value;
+          const listingPackage = document.getElementById('listing-package')?.value;
+          const description = document.getElementById('room-description')?.value?.trim();
+          const ownerName = document.getElementById('owner-name')?.value?.trim();
+          const contact = document.getElementById('owner-contact')?.value?.trim();
+
+          if (!title || !district || !area || !price || !location || !ownerName || !contact) {
+            return showToast('Please fill all required fields', 'error');
+          }
+
+          const listingFee = parseInt(listingPackage) || 0;
+
+          showLoading(true, 'Processing payment...');
+          initiateRazorpay(listingFee, { description: title }, async (success, payRes) => {
+            if (!success) { showLoading(false); showToast('Payment cancelled', 'error'); return; }
+            try {
+              showLoading(true, 'Uploading photos...');
+              const basePath = `rooms/${Date.now()}`;
+              const photoURLs = await uploadImagesToCloudinary(uploadedFiles);
+              const listing = {
+                title, district, area, price, location, roomType,
+                description, ownerName, contact, photos: JSON.stringify(photoURLs),
+                listingFee, featured: listingFee === 999, createdAt: new Date().toISOString(),
+                approved: false, status: 'available', paymentStatus: 'paid', paymentId: payRes.payment_id || payRes.paymentId || payRes.payment_id
+              };
+              await addListingToFirestore(listing);
+              document.getElementById('room-form')?.reset();
+              uploadedFiles = []; uploadedDataURLs = [];
+              updatePhotoPreviewUI();
+              showLoading(false);
+              showToast('Listing submitted! Awaiting admin approval', 'success');
+            } catch (err) {
+              console.error('Upload/listing error', err);
+              showLoading(false);
+              showToast('Error saving listing', 'error');
+            }
+          });
+        } catch (err) {
+          console.error(err);
+          showToast('Unexpected error', 'error');
+        }
+      });
+    }
+
+    /***** REALTIME LISTENERS *****/
+    function initRealtimeRoomsListener() {
+      if (!db) return;
+      db.collection('rooms').orderBy('createdAt','desc').onSnapshot(snap => {
+        const arr = [];
+        snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
+        currentRooms = arr;
+        renderOwnerList();
+        renderAvailableRooms();
+        renderAdminListings();
+      }, err => {
+        console.error('rooms listener error', err);
+      });
+    }
+    initRealtimeRoomsListener();
+
+    function renderOwnerList() {
+      const el = document.getElementById('owner-rooms');
+      if (!el) return;
+      if (!currentRooms.length) { el.innerHTML = '<p class="text-gray-500 text-center py-8">No properties listed yet.</p>'; return; }
+      el.innerHTML = currentRooms.map(r => {
+        const photos = r.photos ? JSON.parse(r.photos) : [];
+        return `<div class="border rounded-lg p-4 ${r.featured ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200'}">
+          <div class="flex justify-between">
+            <div>
+              <h4 class="font-semibold">${escapeHtml(r.title)}</h4>
+              <p class="text-sm text-gray-600">📍 ${escapeHtml(r.district)} — ${escapeHtml(r.area)}</p>
+              <p class="text-lg font-bold text-green-600">₹${r.price}/mo</p>
+              <p class="text-xs text-gray-600">Owner: ${escapeHtml(r.ownerName)} | ${escapeHtml(r.contact)}</p>
+              <div class="flex gap-2 mt-2">
+                <span class="text-xs px-2 py-1 rounded ${r.approved ? 'bg-green-100' : 'bg-yellow-100'}">${r.approved ? '✅ Approved' : '⏳ Pending'}</span>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2">
+              <button class="text-red-600" onclick="deleteListing('${r.id}')">Delete</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderAvailableRooms() {
+      const el = document.getElementById('available-rooms') || document.getElementById('search-results');
+      if (!el) return;
+      const rooms = currentRooms.filter(r => r.approved && r.status === 'available');
+      if (!rooms.length) { el.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-full">No properties available.</p>'; return; }
+      el.innerHTML = rooms.map(r => {
+        const photos = r.photos ? JSON.parse(r.photos) : [];
+        return `<div class="border rounded-lg p-4 hover:shadow-md transition ${r.featured ? 'border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50' : 'border-gray-200'}">
+          ${photos.length? `<img src="${photos[0]}" class="w-full h-40 object-cover rounded mb-2">` : ''}
+          <h4 class="font-semibold">${escapeHtml(r.title)}</h4>
+          <p class="text-sm text-gray-600">📍 ${escapeHtml(r.district)} — ${escapeHtml(r.area)}</p>
+          <p class="text-lg font-bold text-green-600">₹${r.price}/mo</p>
+          <p class="text-sm text-gray-700 mt-2">${escapeHtml(r.description || '')}</p>
+          <div class="mt-3"><button class="w-full bg-blue-600 text-white py-2 rounded" onclick="openBooking('${r.id}')">Book Now</button></div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderAdminListings() {
+      const el = document.getElementById('all-properties');
+      if (!el) return;
+      el.innerHTML = currentRooms.length === 0 ? '<p class="text-gray-500 text-center py-8">No listings</p>' : currentRooms.map(r => {
+        const photos = r.photos ? JSON.parse(r.photos) : [];
+        return `<div class="border rounded-lg p-4 ${r.approved ? 'border-green-300 bg-green-50' : 'border-gray-300'}">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <h4 class="font-semibold">${escapeHtml(r.title)}</h4>
+                ${r.featured ? '<span class="text-xs bg-yellow-500 text-white px-2 py-1 rounded">⭐ FEATURED</span>' : ''}
+              </div>
+              <p class="text-sm">₹${r.price}/mo | Listing Fee: ₹${r.listingFee}</p>
+              <p class="text-xs text-gray-600">${escapeHtml(r.district)} — ${escapeHtml(r.area)} | ${escapeHtml(r.ownerName)}</p>
+              <div class="mt-2">
+                <span class="text-xs px-2 py-1 rounded ${r.approved ? 'bg-green-100' : 'bg-yellow-100'}">${r.approved ? '✅ Approved' : '⏳ Pending'}</span>
+                <span class="text-xs px-2 py-1 rounded ml-2 ${r.status === 'booked' ? 'bg-blue-100' : 'bg-gray-100'}">${r.status === 'booked' ? '📅 Booked' : '🏠 Available'}</span>
+              </div>
+            </div>
+            <div>
+              <button onclick="deleteListing('${r.id}')" class="text-red-600 hover:text-red-800 text-sm font-medium">🗑️ Delete</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    /***** SEARCH (RENT & STUDENT) *****/
+    document.getElementById('search-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      const district = document.getElementById('search-district').value;
+      const area = document.getElementById('search-area').value;
+      const type = document.getElementById('search-type').value;
+      const maxPrice = parseInt(document.getElementById('search-max-price').value || '0') || 0;
+
+      const filtered = currentRooms.filter(r => {
+        if (!r.approved || r.status !== 'available') return false;
+        if (district && r.district !== district) return false;
+        if (area && r.area !== area) return false;
+        if (type && r.roomType !== type) return false;
+        if (maxPrice && r.price > maxPrice) return false;
+        return true;
+      });
+
+      const el = document.getElementById('available-rooms');
+      if (el) {
+        if (!filtered.length) el.innerHTML = '<p class="text-gray-500 text-center py-8">No matching rooms</p>';
+        else el.innerHTML = filtered.map(r => {
+          const photos = r.photos ? JSON.parse(r.photos) : [];
+          return `<div class="border rounded-lg p-4">
+            ${photos.length? `<img src="${photos[0]}" class="w-full h-40 object-cover rounded mb-2">` : ''}
+            <h4 class="font-semibold">${escapeHtml(r.title)}</h4>
+            <p class="text-sm">📍 ${escapeHtml(r.district)} — ${escapeHtml(r.area)}</p>
+            <p class="text-lg font-bold text-green-600">₹${r.price}/mo</p>
+            <div class="mt-3"><button class="w-full bg-blue-600 text-white py-2 rounded" onclick="openBooking('${r.id}')">Book Now</button></div>
+          </div>`;
+        }).join('');
+      }
+    });
+
+    // STUDENT SEARCH
+    document.getElementById('student-search-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('student-name').value.trim();
+      const email = document.getElementById('student-email').value.trim();
+      const phone = document.getElementById('student-phone').value.trim();
+      const city = document.getElementById('student-city').value;
+      const area = document.getElementById('student-area').value;
+      const maxPrice = parseInt(document.getElementById('student-price').value || '0') || 0;
+
+      if (!name || !email || !phone || !city) {
+        return showToast('Please fill required student details', 'error');
+      }
+
+      const list = currentRooms.filter(r => {
+        if (!r.approved || r.status !== 'available') return false;
+        if (city && r.district !== city) return false;
+        if (area && r.area !== area) return false;
+        if (maxPrice && r.price > maxPrice) return false;
+        return true;
+      });
+
+      const resultsEl = document.getElementById('student-results');
+      resultsEl.innerHTML = list.length === 0 ? '<p class="text-center text-gray-500 py-8">No rooms found</p>' :
+        list.map(r => {
+          const photos = r.photos ? JSON.parse(r.photos) : [];
+          return `<div class="border rounded-xl p-4 shadow">
+            ${photos.length ? `<img src="${photos[0]}" class="w-full h-40 object-cover rounded mb-3">` : ""}
+            <h3 class="font-bold text-lg">${escapeHtml(r.title)}</h3>
+            <p class="text-gray-600 text-sm">📍 ${escapeHtml(r.district)} — ${escapeHtml(r.area)}</p>
+            <p class="text-green-600 font-bold text-lg">₹${r.price}/mo</p>
+            <button class="w-full bg-blue-600 text-white py-2 rounded mt-3" onclick='studentBookPrompt("${r.id}")'>Send Booking Request</button>
+          </div>`;
+        }).join('');
+      // store student searcher info in global (temporarily)
+      window.lastStudentFinder = { name, email, phone };
+    });
+
+    // Prompt + Save student booking
+    window.studentBookPrompt = async (roomId) => {
+      const info = window.lastStudentFinder || {};
+      if (!info.name || !info.email || !info.phone) return showToast('Please enter student details first', 'error');
+      const confirmBooking = confirm(`Send booking request for room ${roomId}?`);
+      if (!confirmBooking) return;
+      const booking = {
+        roomId,
+        name: info.name,
+        email: info.email,
+        phone: info.phone,
+        createdAt: new Date().toISOString(),
+        status: 'pending'
+      };
+      try {
+        await db.collection('studentBookings').add(booking);
+        showToast('Booking Request Sent!', 'success');
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to send booking', 'error');
+      }
+    };
+
+    /***** BOOKING (RENTER) *****/
+    window.openBooking = (roomId) => {
+      const r = currentRooms.find(x => x.id === roomId);
+      if (!r) return showToast('Listing not found', 'error');
+      selectedRoomForBooking = r;
+      document.getElementById('booking-details').innerHTML = `<h4 class="font-semibold">${escapeHtml(r.title)}</h4><p class="text-sm text-gray-600">📍 ${escapeHtml(r.district)} — ${escapeHtml(r.area)}</p><p class="text-lg font-bold text-green-600">₹${r.price}/month</p>`;
+      document.getElementById('booking-modal').classList.remove('hidden');
+    };
+
+    document.getElementById('cancel-booking').addEventListener('click', () => {
+      document.getElementById('booking-modal').classList.add('hidden');
+    });
+
+    document.getElementById('booking-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!selectedRoomForBooking) return;
+      const renterName = document.getElementById('renter-name').value.trim();
+      const renterContact = document.getElementById('renter-contact').value.trim();
+      const moveIn = document.getElementById('move-in-date').value;
+      if (!renterName || !renterContact || !moveIn) return showToast('Fill booking details', 'error');
+      const commission = Math.round(selectedRoomForBooking.price * 0.2);
+      initiateRazorpay(commission, { description: 'Booking commission'}, async (success, res) => {
+        if (!success) return showToast('Payment cancelled', 'error');
+        try {
+          await db.collection('rooms').doc(selectedRoomForBooking.id).update({ status: 'booked', bookingPaymentId: res.payment_id || res.paymentId, bookedBy: renterName, bookedAt: new Date().toISOString() });
+          document.getElementById('booking-modal').classList.add('hidden');
+          showToast('Booking confirmed!', 'success');
+        } catch (err) {
+          console.error(err); showToast('Failed to confirm booking', 'error');
+        }
+      });
+    });
+
+    /***** ADMIN ACTIONS *****/
+    window.approveListing = async (id) => {
+      if (!confirm('Approve this listing?')) return;
+      try {
+        await db.collection('rooms').doc(id).update({ approved: true });
+        showToast('Listing approved', 'success');
+      } catch (err) { console.error(err); showToast('Approve failed', 'error'); }
+    };
+
+    window.deleteListing = async (id) => {
+      if (!confirm('Delete this listing?')) return;
+      try {
+        await db.collection('rooms').doc(id).delete();
+        showToast('Listing deleted', 'success');
+      } catch (err) { console.error(err); showToast('Delete failed', 'error'); }
+    };
+
+    /***** ADMIN: STUDENT BOOKINGS UI *****/
+    function renderStudentBookingsRealtime() {
+      const el = document.getElementById('student-bookings');
+      if (!el || !db) return;
+      db.collection('studentBookings').orderBy('createdAt','desc').onSnapshot(snap => {
+        const arr = [];
+        snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
+        if (!arr.length) { el.innerHTML = '<p class="text-gray-500 text-center py-8">No booking requests</p>'; return; }
+        el.innerHTML = arr.map(b => `
+          <div class="border rounded-lg p-4 bg-gray-50">
+            <p><strong>${escapeHtml(b.name)}</strong> — <span class="text-sm text-gray-600">${escapeHtml(b.email)}</span></p>
+            <p class="text-sm">${escapeHtml(b.phone)}</p>
+            <p class="text-xs text-gray-500 mt-1">Room ID: ${escapeHtml(b.roomId)} | Status: ${escapeHtml(b.status)}</p>
+            <div class="mt-3 flex gap-2">
+              <button class="bg-green-600 text-white px-3 py-1 rounded" onclick="markStudentBooking('${b.id}','contacted')">Mark Contacted</button>
+              <button class="bg-red-600 text-white px-3 py-1 rounded" onclick="deleteStudentBooking('${b.id}')">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      });
+    }
+    renderStudentBookingsRealtime();
+
+    window.markStudentBooking = async (id, status) => {
+      try {
+        await db.collection('studentBookings').doc(id).update({ status });
+        showToast('Status updated', 'success');
+      } catch (err) { console.error(err); showToast('Update failed', 'error'); }
+    };
+
+    window.deleteStudentBooking = async (id) => {
+      if (!confirm('Delete this booking request?')) return;
+      try {
+        await db.collection('studentBookings').doc(id).delete();
+        showToast('Booking Deleted', 'success');
+      } catch (err) { console.error(err); showToast('Delete failed', 'error'); }
+    };
+
+    /***** ADMIN LOGIN (simple) *****/
+    document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('admin-email-input').value;
+      const password = document.getElementById('admin-password-input').value;
+      showLoading(true, 'Logging in...');
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        showLoading(false);
+        showToast('Login successful!', 'success');
+        document.getElementById('section-admin-login').classList.add('hidden-section');
+        document.getElementById('section-admin-dashboard').classList.remove('hidden-section');
+      } catch (err) {
+        console.error(err);
+        showLoading(false);
+        showToast('Login failed: ' + (err.message || ''), 'error');
+      }
+    });
+
+    document.getElementById('admin-logout').addEventListener('click', async () => {
+      if (!confirm('Logout admin?')) return;
+      await auth.signOut();
+      showToast('Logged out', 'success');
+      document.getElementById('section-admin-dashboard').classList.add('hidden-section');
+      document.getElementById('section-admin-login').classList.remove('hidden-section');
+    });
+
+    /***** REALTIME DASH UPDATES (stats) *****/
+    function updateDashboardStats() {
+      const total = currentRooms.length;
+      const pending = currentRooms.filter(r => !r.approved).length;
+      const approved = currentRooms.filter(r => r.approved).length;
+      const revenue = currentRooms.reduce((s, r) => s + (r.listingFee || 0), 0);
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-pending').textContent = pending;
+      document.getElementById('stat-approved').textContent = approved;
+      document.getElementById('stat-revenue').textContent = '₹' + revenue;
+      // pending list
+      const pendEl = document.getElementById('pending-approvals');
+      if (pendEl) {
+        const pend = currentRooms.filter(r => !r.approved);
+        if (!pend.length) pendEl.innerHTML = '<p class="text-gray-500 text-center py-8">No pending approvals</p>';
+        else pendEl.innerHTML = pend.map(r => {
+          const photos = r.photos ? JSON.parse(r.photos) : [];
+          return `
+            <div class="border rounded-lg p-4 bg-yellow-50">
+              <div class="flex justify-between">
+                <div>
+                  <h4 class="font-semibold">${escapeHtml(r.title)}</h4>
+                  <p class="text-sm text-gray-600">₹${r.price}/mo | ${escapeHtml(r.district)} — ${escapeHtml(r.area)}</p>
+                  <p class="text-xs text-gray-500 mt-1">${escapeHtml(r.description || '')}</p>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <button class="bg-green-600 text-white px-3 py-1 rounded" onclick="approveListing('${r.id}')">Approve</button>
+                  <button class="bg-red-600 text-white px-3 py-1 rounded" onclick="deleteListing('${r.id}')">Delete</button>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+      }
+    }
+
+    // call render updates when rooms change
+    setInterval(()=>{ renderOwnerList(); renderAvailableRooms(); renderAdminListings(); updateDashboardStats(); }, 1500);
+
+    /***** UTILITIES *****/
+    function showLoading(show, text='Processing...') {
+      let ld = document.getElementById('loading');
+      if (!ld) {
+        ld = document.createElement('div');
+        ld.id = 'loading';
+        ld.className = 'fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50';
+        ld.innerHTML = `<div class="bg-white rounded-lg p-6 flex flex-col items-center">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-3"></div><div id="loading-txt">${text}</div></div>`;
+        document.body.appendChild(ld);
+      }
+      ld.classList.toggle('hidden', !show);
+      const txt = document.getElementById('loading-txt');
+      if (txt) txt.textContent = text;
+    }
+
+    function showToast(msg, type='success') {
+      const el = document.createElement('div');
+      el.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${type==='success' ? 'bg-green-600' : type==='warning' ? 'bg-yellow-600' : 'bg-red-600'} text-white`;
+      el.textContent = msg;
+      document.body.appendChild(el);
+      setTimeout(()=> el.remove(), 3000);
+    }
+
+    function escapeHtml(s) {
+      if (!s) return '';
+      return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+    }
+
+    // initial render
+    setTimeout(()=>{ renderOwnerList(); renderAvailableRooms(); renderAdminListings(); updateDashboardStats(); }, 1000);
+  </script>
+
+</body>
+</html>
