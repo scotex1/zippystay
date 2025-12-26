@@ -449,87 +449,7 @@
 
     </section>
 
-    <!-- ADMIN LOGIN -->
-    <section id="section-admin-login" class="hidden-section mt-6">
-      <div class="max-w-md mx-auto">
-        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 class="text-2xl font-bold mb-4">🔐 Admin Panel - Login</h2>
-          <p class="text-sm">Use your admin credentials to sign in.</p>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-lg p-8">
-          <div class="text-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Admin Login</h1>
-          </div>
-
-          <form id="admin-login-form" class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Admin Email</label>
-              <input type="email" id="admin-email-input" required class="w-full px-4 py-3 border rounded" value="admin@prayagrajrooms.com" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-              <input type="password" id="admin-password-input" required class="w-full px-4 py-3 border rounded" placeholder="Enter your password" />
-            </div>
-            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded">🔓 Login as Admin</button>
-          </form>
-
-          <div id="admin-firebase-status" class="mt-6 text-center text-sm"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ADMIN DASHBOARD -->
-    <section id="section-admin-dashboard" class="hidden-section mt-6">
-      <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl shadow-lg p-6 mb-6">
-        <div class="flex justify-between items-center gap-4">
-          <div>
-            <h1 class="text-3xl font-bold">🔐 Admin Dashboard</h1>
-            <p class="mt-2">UP Room Finder - Admin Control Panel</p>
-          </div>
-          <div class="flex gap-3">
-            <a href="#" id="admin-main-link" class="bg-white bg-opacity-20 px-4 py-2 rounded-lg">🏠 Main Site</a>
-            <button id="admin-logout" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg">🚪 Logout</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-gray-500 text-sm font-medium mb-1">Total Properties</h3>
-          <p id="stat-total" class="text-3xl font-bold text-blue-600">0</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-gray-500 text-sm font-medium mb-1">Pending Approval</h3>
-          <p id="stat-pending" class="text-3xl font-bold text-yellow-600">0</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-gray-500 text-sm font-medium mb-1">Approved</h3>
-          <p id="stat-approved" class="text-3xl font-bold text-green-600">0</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-gray-500 text-sm font-medium mb-1">Total Revenue</h3>
-          <p id="stat-revenue" class="text-3xl font-bold text-purple-600">₹0</p>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <h3 class="text-xl font-bold mb-4">⏳ Pending Approvals</h3>
-        <div id="pending-approvals" class="space-y-4"><p class="text-gray-500 text-center py-8">Loading...</p></div>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <h3 class="text-xl font-bold mb-4">📋 All Properties</h3>
-        <div id="all-properties" class="space-y-4"><p class="text-gray-500 text-center py-8">Loading...</p></div>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <h3 class="text-xl font-bold mb-4">🎓 Student Booking Requests</h3>
-        <div id="student-bookings" class="space-y-4"><p class="text-gray-500 text-center py-8">Loading...</p></div>
-      </div>
-
-    </section>
-
+   
   </main>
 
   <!-- SCRIPTS -->
@@ -1023,126 +943,9 @@
         }
       });
     });
-
-    /***** ADMIN ACTIONS *****/
-    window.approveListing = async (id) => {
-      if (!confirm('Approve this listing?')) return;
-      try {
-        await db.collection('rooms').doc(id).update({ approved: true });
-        showToast('Listing approved', 'success');
-      } catch (err) { console.error(err); showToast('Approve failed', 'error'); }
-    };
-
-    window.deleteListing = async (id) => {
-      if (!confirm('Delete this listing?')) return;
-      try {
-        await db.collection('rooms').doc(id).delete();
-        showToast('Listing deleted', 'success');
-      } catch (err) { console.error(err); showToast('Delete failed', 'error'); }
-    };
-
-    /***** ADMIN: STUDENT BOOKINGS UI *****/
-    function renderStudentBookingsRealtime() {
-      const el = document.getElementById('student-bookings');
-      if (!el || !db) return;
-      db.collection('studentBookings').orderBy('createdAt','desc').onSnapshot(snap => {
-        const arr = [];
-        snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
-        if (!arr.length) { el.innerHTML = '<p class="text-gray-500 text-center py-8">No booking requests</p>'; return; }
-        el.innerHTML = arr.map(b => `
-          <div class="border rounded-lg p-4 bg-gray-50">
-            <p><strong>${escapeHtml(b.name)}</strong> — <span class="text-sm text-gray-600">${escapeHtml(b.email)}</span></p>
-            <p class="text-sm">${escapeHtml(b.phone)}</p>
-            <p class="text-xs text-gray-500 mt-1">Room ID: ${escapeHtml(b.roomId)} | Status: ${escapeHtml(b.status)}</p>
-            <div class="mt-3 flex gap-2">
-              <button class="bg-green-600 text-white px-3 py-1 rounded" onclick="markStudentBooking('${b.id}','contacted')">Mark Contacted</button>
-              <button class="bg-red-600 text-white px-3 py-1 rounded" onclick="deleteStudentBooking('${b.id}')">Delete</button>
-            </div>
-          </div>
-        `).join('');
-      });
-    }
-    renderStudentBookingsRealtime();
-
-    window.markStudentBooking = async (id, status) => {
-      try {
-        await db.collection('studentBookings').doc(id).update({ status });
-        showToast('Status updated', 'success');
-      } catch (err) { console.error(err); showToast('Update failed', 'error'); }
-    };
-
-    window.deleteStudentBooking = async (id) => {
-      if (!confirm('Delete this booking request?')) return;
-      try {
-        await db.collection('studentBookings').doc(id).delete();
-        showToast('Booking Deleted', 'success');
-      } catch (err) { console.error(err); showToast('Delete failed', 'error'); }
-    };
-
-    /***** ADMIN LOGIN (simple) *****/
-    document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('admin-email-input').value;
-      const password = document.getElementById('admin-password-input').value;
-      showLoading(true, 'Logging in...');
-      try {
-        await auth.signInWithEmailAndPassword(email, password);
-        showLoading(false);
-        showToast('Login successful!', 'success');
-        document.getElementById('section-admin-login').classList.add('hidden-section');
-        document.getElementById('section-admin-dashboard').classList.remove('hidden-section');
-      } catch (err) {
-        console.error(err);
-        showLoading(false);
-        showToast('Login failed: ' + (err.message || ''), 'error');
-      }
-    });
-
-    document.getElementById('admin-logout').addEventListener('click', async () => {
-      if (!confirm('Logout admin?')) return;
-      await auth.signOut();
-      showToast('Logged out', 'success');
-      document.getElementById('section-admin-dashboard').classList.add('hidden-section');
-      document.getElementById('section-admin-login').classList.remove('hidden-section');
-    });
-
-    /***** REALTIME DASH UPDATES (stats) *****/
-    function updateDashboardStats() {
-      const total = currentRooms.length;
-      const pending = currentRooms.filter(r => !r.approved).length;
-      const approved = currentRooms.filter(r => r.approved).length;
-      const revenue = currentRooms.reduce((s, r) => s + (r.listingFee || 0), 0);
-      document.getElementById('stat-total').textContent = total;
-      document.getElementById('stat-pending').textContent = pending;
-      document.getElementById('stat-approved').textContent = approved;
-      document.getElementById('stat-revenue').textContent = '₹' + revenue;
-      // pending list
-      const pendEl = document.getElementById('pending-approvals');
-      if (pendEl) {
-        const pend = currentRooms.filter(r => !r.approved);
-        if (!pend.length) pendEl.innerHTML = '<p class="text-gray-500 text-center py-8">No pending approvals</p>';
-        else pendEl.innerHTML = pend.map(r => {
-          const photos = r.photos ? JSON.parse(r.photos) : [];
-          return `
-            <div class="border rounded-lg p-4 bg-yellow-50">
-              <div class="flex justify-between">
-                <div>
-                  <h4 class="font-semibold">${escapeHtml(r.title)}</h4>
-                  <p class="text-sm text-gray-600">₹${r.price}/mo | ${escapeHtml(r.district)} — ${escapeHtml(r.area)}</p>
-                  <p class="text-xs text-gray-500 mt-1">${escapeHtml(r.description || '')}</p>
-                </div>
-                <div class="flex flex-col gap-2">
-                  <button class="bg-green-600 text-white px-3 py-1 rounded" onclick="approveListing('${r.id}')">Approve</button>
-                  <button class="bg-red-600 text-white px-3 py-1 rounded" onclick="deleteListing('${r.id}')">Delete</button>
-                </div>
-              </div>
-            </div>`;
-        }).join('');
-      }
-    }
-
+     
     // call render updates when rooms change
-    setInterval(()=>{ renderOwnerList(); renderAvailableRooms(); renderAdminListings(); updateDashboardStats(); }, 1500);
+    setInterval(()=>{ renderOwnerList(); renderAvailableRooms();  }, 1500);
 
     /***** UTILITIES *****/
     function showLoading(show, text='Processing...') {
@@ -1174,8 +977,9 @@
     }
 
     // initial render
-    setTimeout(()=>{ renderOwnerList(); renderAvailableRooms(); renderAdminListings(); updateDashboardStats(); }, 1000);
+    setTimeout(()=>{ renderOwnerList();  renderAvailableRooms();   }, 1000);
   </script>
 
 </body>
 </html>
+
