@@ -731,29 +731,50 @@
       apiKey: "AIzaSyAoPCQNk0YWg9YAdflZpVItLYg_7VwoQAw",
       authDomain: "roomstore-51114.firebaseapp.com",
       projectId: "roomstore-51114",
-      storageBucket: "roomstore-51114.firebasestorage.app",
+      storageBucket:"roomstore-51114.appspot.com",
       messagingSenderId: "112181513858",
       appId: "1:112181513858:web:e702d73c606a6e41e1ae9b",
       measurementId: "G-S4WLNW0Q2W"
     };
     const RAZORPAY_KEY = "rzp_live_YOUR_REAL_KEY_HERE";
 
-    /***** INIT FIREBASE *****/
-    let db = null, storage = null, auth = null;
-    try {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-      storage = firebase.storage();
-      auth = firebase.auth();
-      const fbEl = document.getElementById('firebase-status');
-      if (fbEl) fbEl.innerHTML = '<p class="font-bold text-green-700">✅ Firebase Connected!</p>';
-      document.getElementById('admin-firebase-status').innerHTML = '<span class="text-green-600">✅ Firebase Ready</span>';
-    } catch (err) {
-      console.error('Firebase init error', err);
-      const fbEl = document.getElementById('firebase-status');
-      if (fbEl) fbEl.innerHTML = '<p class="font-bold text-red-700">❌ Firebase Failed</p>';
-      document.getElementById('admin-firebase-status').innerHTML = '<span class="text-red-600">❌ Firebase not initialized</span>';
-    }
+  
+  /***** INIT FIREBASE *****/
+let db = null, storage = null, auth = null;
+
+try {
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+
+  db = firebase.firestore();
+  storage = firebase.storage();
+  auth = firebase.auth();
+
+  const fbEl = document.getElementById('firebase-status');
+  if (fbEl) {
+    fbEl.innerHTML = '<p class="font-bold text-green-700">✅ Firebase Connected!</p>';
+  }
+
+  const adminEl = document.getElementById('admin-firebase-status');
+  if (adminEl) {
+    adminEl.innerHTML = '<span class="text-green-600">✅ Firebase Ready</span>';
+  }
+
+} catch (err) {
+  console.error('Firebase init error', err);
+
+  const fbEl = document.getElementById('firebase-status');
+  if (fbEl) {
+    fbEl.innerHTML = '<p class="font-bold text-red-700">❌ Firebase Failed</p>';
+  }
+
+  const adminEl = document.getElementById('admin-firebase-status');
+  if (adminEl) {
+    adminEl.innerHTML = '<span class="text-red-600">❌ Firebase not initialized</span>';
+  }
+}
+
 
     /***** GLOBAL STATE *****/
     let uploadedFiles = [];
@@ -1284,4 +1305,5 @@
 </script>
 </body>
 </html>
+
 
