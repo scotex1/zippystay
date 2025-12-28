@@ -1303,7 +1303,19 @@ try {
   // Default section on load
   showSection("section-main");
 </script>
+  <!-- Footer -->
+<div id="footer-container"></div>
+
+<script>
+  fetch("footer.html")
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById("footer-container").innerHTML = html;
+    });
+</script>
+
 </body>
 </html>
+
 
 
