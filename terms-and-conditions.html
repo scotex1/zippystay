@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Terms & Conditions | ZippyStay</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+<div class="max-w-4xl mx-auto px-6 py-10">
+  <h1 class="text-3xl font-bold mb-6">Terms & Conditions</h1>
+
+  <p class="mb-4">
+    By accessing and using ZippyStay, you agree to comply with these Terms & Conditions.
+  </p>
+
+  <h2 class="font-semibold mt-4 mb-2">Service Usage</h2>
+  <p class="mb-4">
+    Our platform provides room and accommodation booking services.
+    Availability is subject to confirmation.
+  </p>
+
+  <h2 class="font-semibold mt-4 mb-2">User Responsibility</h2>
+  <p class="mb-4">
+    Users must provide accurate and complete information during booking.
+    Any misuse of the platform is strictly prohibited.
+  </p>
+
+  <h2 class="font-semibold mt-4 mb-2">Modifications</h2>
+  <p class="mb-4">
+    ZippyStay reserves the right to modify or discontinue any part of the service
+    without prior notice.
+  </p>
+
+  <p class="mt-6 text-sm text-gray-600">
+    Continued use of the website implies acceptance of these terms.
+  </p>
+</div>
+
+<div id="footer-container"></div>
+<script>
+fetch("footer.html").then(r=>r.text()).then(t=>{
+  document.getElementById("footer-container").innerHTML=t;
+});
+</script>
+
+</body>
+</html>
